@@ -40,11 +40,6 @@ async function bootstrap() {
       });
     }
 
-    // Start API
-    app.listen(PORT, () => {
-      console.log(`[API] Server is running on port ${PORT}`);
-    });
-
     // Start Bot
     if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'dummy') {
       bot.launch();
@@ -58,6 +53,11 @@ async function bootstrap() {
   } catch (err) {
     console.error("Bootstrap error:", err);
   }
+
+  // ALWAYS Start API regardless of DB errors so Railway doesn't kill the container
+  app.listen(PORT, () => {
+    console.log(`[API] Server is running on port ${PORT}`);
+  });
 }
 
 bootstrap();

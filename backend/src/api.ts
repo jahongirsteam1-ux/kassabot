@@ -66,3 +66,8 @@ app.post('/api/create-invoice', async (req, res) => {
     res.status(500).json({ error: "Failed to create invoice link" });
   }
 });
+
+// Catch-all route for frontend
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+});
