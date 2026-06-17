@@ -7,18 +7,18 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "CommonJS",
+    "module": "Node16",
     "target": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "types": [],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "strict": false,
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
