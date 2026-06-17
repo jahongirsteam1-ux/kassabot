@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["nodejs", "npm"]
+
+[start]
+cmd = "npm run start"
+
+[variables]
+PORT = "3000"
