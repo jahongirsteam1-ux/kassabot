@@ -9,6 +9,11 @@ export const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check route for Railway (must be BEFORE static files to avoid libuv thread pool exhaustion)
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Serve static files from frontend build
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
