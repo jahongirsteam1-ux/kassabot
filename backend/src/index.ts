@@ -47,8 +47,12 @@ async function bootstrap() {
 
     // Start Bot
     if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'dummy') {
-      bot.launch();
-      console.log(`[Bot] Telegram bot started.`);
+      try {
+        await bot.launch();
+        console.log(`[Bot] Telegram bot started.`);
+      } catch (botErr) {
+        console.error(`[Bot] Failed to start telegram bot:`, botErr);
+      }
     } else {
       console.log(`[Bot] Skipping bot launch, no valid BOT_TOKEN provided.`);
     }
