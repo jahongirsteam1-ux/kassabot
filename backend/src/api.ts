@@ -71,7 +71,103 @@ app.post('/api/create-invoice', async (req, res) => {
     res.status(500).json({ error: "Failed to create invoice link" });
   }
 });
+// Admin Middleware
+import { validateWebAppData } from './utils/telegramAuth';
 
+const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Check local development bypass or real telegram auth
+  const isLocalHost = req.hostname === 'localhost';
+  if (isLocalHost && process.env.NODE_ENV !== 'production') {
+    return next(); // Bypass for local dev testing if needed
+  }
+
+  const initData = req.headers['x-telegram-init-data'] as string;
+  const botToken = process.env.BOT_TOKEN;
+  const adminId = process.env.ADMIN_ID; // The user's Telegram ID from Railway variables
+
+  if (!initData || !botToken) {
+    return res.status(401).json({ error: 'Unauthorized: Missing initData or token' });
+  }
+
+  const user = validateWebAppData(initData, botToken);
+  
+  // Also check against hardcoded ID if ADMIN_ID is not set yet, to prevent total lockout for the owner during setup
+  if (!user || (adminId && user.id?.toString() !== adminId)) {
+    return res.status(403).json({ error: 'Forbidden: You are not the admin' });
+  }
+
+  next();
+};
+
+// --- Admin Routes ---
+
+// Get basic stats
+app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+  try {
+    const totalUsers = await prisma.user.count();
+    const activeSubs = await prisma.subscription.count({ where: { status: 'ACTIVE' } });
+    const totalChannels = await prisma.channel.count();
+    res.json({ totalUsers, activeSubs, totalChannels });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add a new channel
+app.post('/api/admin/channels', requireAdmin, async (req, res) => {
+  const { id, title, adminId } = req.body;
+  try {
+    const channel = await prisma.channel.create({
+      data: { id, title, adminId: adminId || "12345" }
+    });
+    res.json(channel);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add channel' });
+  }
+});
+
+// Delete a channel
+app.delete('/api/admin/channels/:id', requireAdmin, async (req, res) => {
+  try {
+    await prisma.plan.deleteMany({ where: { channelId: req.params.id } });
+    await prisma.subscription.deleteMany({ where: { channelId: req.params.id } });
+    await prisma.channel.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete channel' });
+  }
+});
+
+// Add a plan
+app.post('/api/admin/channels/:channelId/plans', requireAdmin, async (req, res) => {
+  const { channelId } = req.params;
+  const { name, description, price, duration } = req.body;
+  try {
+    const plan = await prisma.plan.create({
+      data: {
+        channelId,
+        name,
+        description,
+        price: Number(price),
+        duration: Number(duration),
+        priceType: 'STARS'
+      }
+    });
+    res.json(plan);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add plan' });
+  }
+});
+
+// Delete a plan
+app.delete('/api/admin/plans/:id', requireAdmin, async (req, res) => {
+  try {
+    await prisma.plan.delete({ where: { id: Number(req.params.id) } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete plan' });
+  }
+});
 // Serve static files from frontend build
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 

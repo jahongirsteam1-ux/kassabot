@@ -31,6 +31,23 @@ bot.start(async (ctx) => {
   );
 });
 
+bot.command('admin', async (ctx) => {
+  const adminId = process.env.ADMIN_ID;
+  const webAppUrl = process.env.WEBAPP_URL || 'https://google.com';
+
+  if (!adminId || ctx.from.id.toString() !== adminId) {
+    // Silently ignore or send a generic message
+    return;
+  }
+
+  await ctx.reply(
+    '🛠 Admin Panelga xush kelibsiz! Kanallar va tariflarni boshqarish uchun pastdagi tugmani bosing.',
+    Markup.inlineKeyboard([
+      Markup.button.webApp('⚙️ Boshqaruv Paneli', `${webAppUrl}?admin=true`)
+    ])
+  );
+});
+
 bot.on('pre_checkout_query', async (ctx) => {
   await ctx.answerPreCheckoutQuery(true);
 });
