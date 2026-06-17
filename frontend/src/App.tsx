@@ -28,8 +28,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
 
-  // You can set this to your local API URL or use production URL
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  // Use relative path by default so it works correctly on production domain
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
 
   useEffect(() => {
     // Initialize Telegram Web App
