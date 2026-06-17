@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Plus, Users, Crown, CreditCard, Settings, Send, List, Save } from 'lucide-react';
+import { Trash2, Plus, Users, Crown, CreditCard, Settings, Send, Save, Receipt, Box, BarChart2, Clock } from 'lucide-react';
 import './index.css';
 
 // TypeScript interfaces
@@ -204,33 +204,56 @@ export default function AdminView() {
   }
 
   return (
-    <>
-      <header>
-        <h1>🛠 Admin Panel</h1>
-        <p>Tizimni boshqarish</p>
+    <div style={{ backgroundColor: '#0b0f19', minHeight: '100vh', padding: '20px', fontFamily: 'sans-serif', color: '#fff' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #1f2937' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0, color: '#fff' }}>Admin Panel</h1>
+        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '500', display: 'flex', alignItems: 'center', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', marginRight: '6px' }}></div>
+          Admin
+        </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '10px', padding: '0 15px', overflowX: 'auto', marginBottom: '20px' }}>
-        <button onClick={() => setActiveTab('channels')} className="pay-btn" style={{ padding: '8px 15px', opacity: activeTab === 'channels' ? 1 : 0.5, flex: '0 0 auto', background: activeTab === 'channels' ? 'var(--accent)' : 'transparent', border: '1px solid var(--accent)' }}><Crown size={16} style={{display: 'inline', marginRight: 5}}/>Kanallar</button>
-        <button onClick={() => setActiveTab('users')} className="pay-btn" style={{ padding: '8px 15px', opacity: activeTab === 'users' ? 1 : 0.5, flex: '0 0 auto', background: activeTab === 'users' ? 'var(--accent)' : 'transparent', border: '1px solid var(--accent)' }}><List size={16} style={{display: 'inline', marginRight: 5}}/>Foydalanuvchilar</button>
-        <button onClick={() => setActiveTab('broadcast')} className="pay-btn" style={{ padding: '8px 15px', opacity: activeTab === 'broadcast' ? 1 : 0.5, flex: '0 0 auto', background: activeTab === 'broadcast' ? 'var(--accent)' : 'transparent', border: '1px solid var(--accent)' }}><Send size={16} style={{display: 'inline', marginRight: 5}}/>Xabar yuborish</button>
-        <button onClick={() => setActiveTab('settings')} className="pay-btn" style={{ padding: '8px 15px', opacity: activeTab === 'settings' ? 1 : 0.5, flex: '0 0 auto', background: activeTab === 'settings' ? 'var(--accent)' : 'transparent', border: '1px solid var(--accent)' }}><Settings size={16} style={{display: 'inline', marginRight: 5}}/>Sozlamalar</button>
+      <div className="admin-tabs">
+        <div className={`admin-tab-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
+          <div className="admin-tab-icon"><Receipt size={24} color={activeTab === 'orders' ? '#10b981' : '#3b82f6'} /></div>
+          <div className="admin-tab-label">Buyurtmalar</div>
+        </div>
+        <div className={`admin-tab-item ${activeTab === 'channels' ? 'active' : ''}`} onClick={() => setActiveTab('channels')}>
+          <div className="admin-tab-icon"><Box size={24} color={activeTab === 'channels' ? '#10b981' : '#eab308'} /></div>
+          <div className="admin-tab-label">Mahsulotlar</div>
+        </div>
+        <div className={`admin-tab-item ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
+          <div className="admin-tab-icon"><Users size={24} color={activeTab === 'users' ? '#10b981' : '#10b981'} /></div>
+          <div className="admin-tab-label">Foydalanuvchilar</div>
+        </div>
+        <div className={`admin-tab-item ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>
+          <div className="admin-tab-icon"><BarChart2 size={24} color={activeTab === 'stats' ? '#10b981' : '#a855f7'} /></div>
+          <div className="admin-tab-label">Statistika</div>
+        </div>
+        <div className={`admin-tab-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
+          <div className="admin-tab-icon"><Settings size={24} color={activeTab === 'settings' ? '#10b981' : '#ef4444'} /></div>
+          <div className="admin-tab-label">Sozlamalar</div>
+        </div>
       </div>
 
       <main style={{ paddingBottom: '80px' }}>
-        {/* Statistics always visible */}
-        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-          <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
-            <Users size={24} style={{ color: 'var(--accent)', marginBottom: '5px' }} />
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.totalUsers}</div>
-            <div style={{ fontSize: '12px', opacity: 0.7 }}>Foydalanuvchilar</div>
+        {activeTab === 'stats' && (
+          <div>
+            <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Statistika</h2>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+              <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
+                <Users size={24} style={{ color: 'var(--accent)', marginBottom: '5px' }} />
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.totalUsers}</div>
+                <div style={{ fontSize: '12px', opacity: 0.7 }}>Foydalanuvchilar</div>
+              </div>
+              <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
+                <CreditCard size={24} style={{ color: '#4ade80', marginBottom: '5px' }} />
+                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.activeSubs}</div>
+                <div style={{ fontSize: '12px', opacity: 0.7 }}>Faol Obunalar</div>
+              </div>
+            </div>
           </div>
-          <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
-            <CreditCard size={24} style={{ color: '#4ade80', marginBottom: '5px' }} />
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.activeSubs}</div>
-            <div style={{ fontSize: '12px', opacity: 0.7 }}>Faol Obunalar</div>
-          </div>
-        </div>
+        )}
 
         {activeTab === 'settings' && (
           <div>
@@ -262,19 +285,19 @@ export default function AdminView() {
           </div>
         )}
 
-        {activeTab === 'broadcast' && (
+        {activeTab === 'orders' && (
           <div>
-            <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Hammaga xabar yuborish</h2>
-            <form onSubmit={handleBroadcast} className="card" style={{ padding: '20px' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Hammaga xabar yuborish</h2>
+            <form onSubmit={handleBroadcast} className="card" style={{ padding: '20px', background: '#151a28', border: '1px solid #2a3441', borderRadius: '16px' }}>
               <textarea 
                 className="admin-input" 
-                style={{ height: '100px', resize: 'vertical' }}
+                style={{ height: '100px', resize: 'vertical', background: '#111827', border: '1px solid #374151' }}
                 placeholder="Xabar matni (barcha foydalanuvchilarga boradi)..." 
                 value={broadcastText} 
                 onChange={e => setBroadcastText(e.target.value)} 
                 required 
               />
-              <button type="submit" className="pay-btn" disabled={broadcasting}>
+              <button type="submit" className="pay-btn" disabled={broadcasting} style={{ background: '#3b82f6' }}>
                 {broadcasting ? <div className="spinner"></div> : <><Send size={16} style={{ display: 'inline', marginRight: '5px' }} /> Yuborish</>}
               </button>
             </form>
@@ -283,23 +306,40 @@ export default function AdminView() {
 
         {activeTab === 'users' && (
           <div>
-            <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Foydalanuvchilar ({users.length})</h2>
-            <div className="card" style={{ padding: '10px' }}>
-              {users.map(user => (
-                <div key={user.id} style={{ padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontWeight: 'bold' }}>{user.firstName || 'Ismsiz'} {user.username ? `(@${user.username})` : ''}</div>
-                  <div style={{ fontSize: '12px', opacity: 0.6, marginBottom: '5px' }}>ID: {user.id}</div>
-                  {user.subs && user.subs.length > 0 ? (
-                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                      {user.subs.map((s: any) => (
-                        <span key={s.id} style={{ background: 'var(--accent)', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>
-                          {s.channel?.title || 'Kanal'}
-                        </span>
-                      ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Foydalanuvchilar</h2>
+              <span style={{ color: '#3b82f6', fontSize: '14px', fontWeight: '500' }}>{users.length} ta</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {users.map(user => {
+                // Determine joined date (using dummy date as it's not in user model, or just ID if numeric)
+                // For layout purposes we use a static string since it's just visual structure for now
+                const joinedDate = '16/06/2026';
+                return (
+                  <div key={user.id} className="user-card">
+                    <div className="user-card-top">
+                      <div className="user-avatar">
+                        {user.firstName ? user.firstName.charAt(0) : 'U'}
+                      </div>
+                      <div className="user-info">
+                        <div className="user-name">{user.firstName || 'Ismsiz'}</div>
+                        <div className="user-username">{user.username ? `@${user.username}` : ''}</div>
+                      </div>
+                      <a href={`tg://user?id=${user.id}`} className="user-action-btn">
+                        <Send size={16} />
+                      </a>
                     </div>
-                  ) : <div style={{ fontSize: '11px', opacity: 0.4 }}>Obunalar yo'q</div>}
-                </div>
-              ))}
+                    <div className="user-card-middle">
+                      <div className="user-phone">{user.id}</div>
+                      <div className="user-badge">{user.subs?.length || 0} obuna</div>
+                    </div>
+                    <div className="user-card-bottom">
+                      <Clock size={12} style={{ marginRight: '6px' }} />
+                      Qo'shilgan: {joinedDate}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -402,6 +442,6 @@ export default function AdminView() {
           </div>
         )}
       </main>
-    </>
+    </div>
   );
 }

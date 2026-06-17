@@ -291,3 +291,135 @@ header p {
   outline: none;
   border-color: var(--accent);
 }
+
+/* NEW ADMIN UI STYLES */
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 0;
+  margin-bottom: 24px;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 85px;
+  height: 85px;
+  border-radius: 16px;
+  background: #151a28; /* Dark slate */
+  border: 1px solid #2a3441;
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.admin-tab-item.active {
+  border-color: #10b981; /* Emerald green */
+  background: rgba(16, 185, 129, 0.05);
+  color: #10b981;
+}
+
+.admin-tab-icon {
+  margin-bottom: 8px;
+}
+
+.admin-tab-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.user-card {
+  background: #151a28;
+  border: 1px solid #2a3441;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-card-top {
+  display: flex;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a3441;
+  margin-bottom: 12px;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #2a3441;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  margin-right: 12px;
+}
+
+.user-info {
+  flex-grow: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.user-username {
+  font-size: 13px;
+  color: #3b82f6;
+}
+
+.user-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.user-card-middle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.user-phone {
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.user-card-bottom {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+  font-size: 12px;
+}
