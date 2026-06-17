@@ -129,9 +129,10 @@ app.post('/api/admin/channels', requireAdmin, async (req, res) => {
 // Delete a channel
 app.delete('/api/admin/channels/:id', requireAdmin, async (req, res) => {
   try {
-    await prisma.plan.deleteMany({ where: { channelId: req.params.id } });
-    await prisma.subscription.deleteMany({ where: { channelId: req.params.id } });
-    await prisma.channel.delete({ where: { id: req.params.id } });
+    const id = req.params.id as string;
+    await prisma.plan.deleteMany({ where: { channelId: id } });
+    await prisma.subscription.deleteMany({ where: { channelId: id } });
+    await prisma.channel.delete({ where: { id: id } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete channel' });
@@ -140,7 +141,7 @@ app.delete('/api/admin/channels/:id', requireAdmin, async (req, res) => {
 
 // Add a plan
 app.post('/api/admin/channels/:channelId/plans', requireAdmin, async (req, res) => {
-  const { channelId } = req.params;
+  const channelId = req.params.channelId as string;
   const { name, description, price, duration } = req.body;
   try {
     const plan = await prisma.plan.create({
