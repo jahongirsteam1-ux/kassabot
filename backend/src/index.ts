@@ -10,12 +10,13 @@ const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 async function bootstrap() {
   // ALWAYS Start API immediately so Railway doesn't kill the container due to timeout
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`[API] Server is running on port ${PORT}`);
   });
 
   try {
-    // Dummy ma'lumotlar bilan to'ldirish (agar bo'sh bo'lsa)
+    // TEMPORARILY DISABLED PRISMA TO DEBUG RAILWAY HANG
+    /*
     const channelCount = await prisma.channel.count();
     if (channelCount === 0) {
       console.log("Seeding initial data...");
@@ -47,6 +48,7 @@ async function bootstrap() {
         }
       });
     }
+    */
 
     // Start Bot
     if (process.env.BOT_TOKEN && process.env.BOT_TOKEN !== 'dummy') {
