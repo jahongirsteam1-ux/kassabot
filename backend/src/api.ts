@@ -67,7 +67,7 @@ app.post('/api/create-invoice', async (req, res) => {
   }
 });
 
-// Catch-all route for frontend
-app.get('*', (req, res) => {
+// Catch-all route for frontend SPA routing (Express 5 compatible)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
