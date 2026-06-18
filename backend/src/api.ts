@@ -250,18 +250,26 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
 
 // Broadcast message
 app.post('/api/admin/broadcast', requireAdmin, async (req, res) => {
-  const { text } = req.body;
-  if (!text) return res.status(400).json({ error: 'Message text required' });
+  const { text, imageBase64 } = req.body;
+  if (!text && !imageBase64) return res.status(400).json({ error: 'Message text or image required' });
 
   try {
     const users = await prisma.user.findMany();
     let successCount = 0;
     
-    // In a real app this should be a background job with delay to avoid rate limits
-    // For now we do a simple loop
+    let imageBuffer: Buffer | null = null;
+    if (imageBase64) {
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+      imageBuffer = Buffer.from(base64Data, 'base64');
+    }
+    
     for (const user of users) {
       try {
-        await bot.telegram.sendMessage(user.id, text);
+        if (imageBuffer) {
+          await bot.telegram.sendPhoto(user.id, { source: imageBuffer }, { caption: text || '' });
+        } else {
+          await bot.telegram.sendMessage(user.id, text);
+        }
         successCount++;
       } catch (e) {
         // user blocked bot etc.

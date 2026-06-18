@@ -34,6 +34,7 @@ export default function AdminView() {
 
   // Broadcast
   const [broadcastText, setBroadcastText] = useState('');
+  const [broadcastImageBase64, setBroadcastImageBase64] = useState<string | null>(null);
   const [broadcasting, setBroadcasting] = useState(false);
 
   // Users, Payments, Revenue, Promos
@@ -175,6 +176,30 @@ export default function AdminView() {
     }
   };
 
+  const handleBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastText && !broadcastImageBase64) return;
+    setBroadcasting(true);
+    try {
+      const res = await fetch(`${API_URL}/admin/broadcast`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ text: broadcastText, imageBase64: broadcastImageBase64 })
+      });
+      if (res.ok) {
+        alert('Xabar yuborildi!');
+        setBroadcastText('');
+        setBroadcastImageBase64(null);
+      } else {
+        alert('Xatolik yuz berdi');
+      }
+    } catch (err) {
+      alert('Xatolik yuz berdi');
+    } finally {
+      setBroadcasting(false);
+    }
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingSettings(true);
@@ -190,30 +215,6 @@ export default function AdminView() {
       alert('Xatolik');
     } finally {
       setSavingSettings(false);
-    }
-  };
-
-  const handleBroadcast = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!broadcastText) return;
-    setBroadcasting(true);
-    try {
-      const res = await fetch(`${API_URL}/admin/broadcast`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ text: broadcastText })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(`${data.count} ta foydalanuvchiga xabar yuborildi!`);
-        setBroadcastText('');
-      } else {
-        alert('Xatolik');
-      }
-    } catch (err) {
-      alert('Xatolik');
-    } finally {
-      setBroadcasting(false);
     }
   };
 
@@ -357,13 +358,36 @@ export default function AdminView() {
           <div>
             <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Hammaga xabar yuborish</h2>
             <form onSubmit={handleBroadcast} className="cyber-card" style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>Rasm (ixtiyoriy):</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setBroadcastImageBase64(reader.result as string);
+                      reader.readAsDataURL(file);
+                    } else {
+                      setBroadcastImageBase64(null);
+                    }
+                  }} 
+                  style={{ color: '#fff' }} 
+                />
+                {broadcastImageBase64 && (
+                  <div style={{ marginTop: '10px' }}>
+                    <img src={broadcastImageBase64} alt="preview" style={{ maxHeight: '150px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                  </div>
+                )}
+              </div>
               <textarea 
                 className="cyber-input" 
                 style={{ height: '100px', width: '100%', resize: 'vertical', marginBottom: '16px' }}
                 placeholder="Xabar matni (barcha foydalanuvchilarga boradi)..." 
                 value={broadcastText} 
                 onChange={e => setBroadcastText(e.target.value)} 
-                required 
+                required={!broadcastImageBase64} 
               />
               <button type="submit" className="neon-btn" disabled={broadcasting} style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}>
                 {broadcasting ? <div className="spinner"></div> : <><Send size={16} style={{ display: 'inline', marginRight: '5px' }} /> Yuborish</>}
@@ -449,30 +473,41 @@ export default function AdminView() {
               </h2>
               <span style={{ color: 'var(--accent-cyan)', fontSize: '14px', fontWeight: '500' }}>{users.length} ta</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {users.map(user => {
-                const joinedDate = '16/06/2026';
+                const joinedDate = new Date(user.createdAt || Date.now()).toLocaleDateString('uz-UZ');
                 return (
-                  <div key={user.id} className="payment-card" style={{ padding: '16px' }}>
-                    <div className="user-card-top" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px', marginBottom: '12px' }}>
-                      <div className="user-avatar" style={{ background: 'linear-gradient(135deg, var(--accent-cyan), #3b82f6)' }}>
+                  <div key={user.id} className="payment-card" style={{ padding: '0', overflow: 'hidden', position: 'relative' }}>
+                    {/* Top blue bar like in screenshot */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '120px', height: '6px', background: 'linear-gradient(90deg, #3b82f6, #00f0ff)', borderBottomRightRadius: '8px' }}></div>
+                    
+                    <div style={{ display: 'flex', padding: '16px', position: 'relative', zIndex: 2, alignItems: 'center' }}>
+                      {/* Avatar */}
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'radial-gradient(circle, #1e3a8a, #0b0f19)', border: '2px solid #3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', color: '#fff', boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)', marginRight: '16px', zIndex: 2 }}>
                         {user.firstName ? user.firstName.charAt(0) : 'U'}
                       </div>
-                      <div className="user-info">
-                        <div className="user-name" style={{ color: '#fff', fontSize: '15px' }}>{user.firstName || 'Ismsiz'}</div>
-                        <div className="user-username" style={{ color: 'var(--accent-cyan)' }}>{user.username ? `@${user.username}` : ''}</div>
+                      
+                      {/* User Info */}
+                      <div style={{ flex: 1, zIndex: 2 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 5px rgba(255,255,255,0.3)' }}>{user.firstName || 'Ismsiz'}</div>
+                        </div>
+                        <div style={{ color: '#3b82f6', fontSize: '14px', marginBottom: '2px' }}>
+                          <a href={`tg://user?id=${user.id}`} style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {user.username ? `@${user.username}` : `@user${user.id}`} <Send size={12} style={{ filter: 'drop-shadow(0 0 5px #3b82f6)' }} />
+                          </a>
+                        </div>
+                        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '8px' }}>
+                          ID: {user.id}
+                        </div>
+                        <div style={{ background: 'rgba(0, 255, 102, 0.1)', border: '1px solid rgba(0, 255, 102, 0.3)', color: '#00ff66', padding: '4px 12px', borderRadius: '8px', display: 'inline-block', fontSize: '13px', fontWeight: '600', marginTop: '6px', backdropFilter: 'blur(4px)' }}>
+                          {user.subs?.length || 0} obuna
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: '12px', marginTop: '8px' }}>
+                          <Clock size={12} style={{ marginRight: '6px', color: '#00f0ff' }} />
+                          Qo'shilgan: {joinedDate}
+                        </div>
                       </div>
-                      <a href={`tg://user?id=${user.id}`} className="user-action-btn" style={{ background: 'rgba(0, 240, 255, 0.1)', color: 'var(--accent-cyan)', border: '1px solid rgba(0, 240, 255, 0.2)' }}>
-                        <Send size={16} />
-                      </a>
-                    </div>
-                    <div className="user-card-middle" style={{ marginBottom: '12px' }}>
-                      <div className="user-phone" style={{ color: 'var(--text-muted)' }}>ID: {user.id}</div>
-                      <div className="user-badge" style={{ background: 'rgba(0, 255, 102, 0.1)', color: 'var(--accent-green)', border: '1px solid rgba(0, 255, 102, 0.2)' }}>{user.subs?.length || 0} obuna</div>
-                    </div>
-                    <div className="user-card-bottom" style={{ borderTop: 'none', margin: 0, padding: 0 }}>
-                      <Clock size={12} style={{ marginRight: '6px', color: 'var(--accent-cyan)' }} />
-                      <span style={{ color: 'var(--text-muted)' }}>Qo'shilgan: {joinedDate}</span>
                     </div>
                   </div>
                 );
