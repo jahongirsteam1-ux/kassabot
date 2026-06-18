@@ -247,7 +247,11 @@ export default function AdminView() {
         <div className="header-controls">
           <div className="pill-tag" style={{ border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'rgba(0,240,255,0.1)', padding: '8px 16px' }}>Admin Panel</div>
           <div className="icon-btn">✨</div>
-          <div className="icon-btn">✕</div>
+          {tg?.initDataUnsafe?.user?.photo_url ? (
+            <img src={tg.initDataUnsafe.user.photo_url} alt="Profile" style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)' }} />
+          ) : (
+            <div className="icon-btn">{tg?.initDataUnsafe?.user?.first_name?.charAt(0) || 'U'}</div>
+          )}
         </div>
       </header>
 
@@ -294,22 +298,24 @@ export default function AdminView() {
       <main>
         {activeTab === 'stats' && (
           <div>
-            <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Statistika</h2>
-            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-              <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
-                <Users size={24} style={{ color: 'var(--accent)', marginBottom: '5px' }} />
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.totalUsers}</div>
-                <div style={{ fontSize: '12px', opacity: 0.7 }}>Foydalanuvchilar</div>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Statistika <span style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, var(--accent-cyan), transparent)' }}></span>
+            </h2>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div className="payment-card" style={{ padding: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Users size={28} style={{ color: 'var(--accent-cyan)', marginBottom: '8px', filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.5))' }} />
+                <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>{stats.totalUsers}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Foydalanuvchilar</div>
               </div>
-              <div className="card" style={{ padding: '15px', textAlign: 'center' }}>
-                <CreditCard size={24} style={{ color: '#4ade80', marginBottom: '5px' }} />
-                <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.activeSubs}</div>
-                <div style={{ fontSize: '12px', opacity: 0.7 }}>Faol Obunalar</div>
+              <div className="payment-card" style={{ padding: '20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <CreditCard size={28} style={{ color: 'var(--accent-green)', marginBottom: '8px', filter: 'drop-shadow(0 0 8px rgba(0, 255, 102, 0.5))' }} />
+                <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(255,255,255,0.3)' }}>{stats.activeSubs}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Faol Obunalar</div>
               </div>
-              <div className="card" style={{ padding: '15px', textAlign: 'center', gridColumn: 'span 2', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '5px' }}>💰 Jami Daromad</div>
-                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{revenue.totalRevenue.toLocaleString('ru-RU')} UZS</div>
-                <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>{revenue.totalPayments} ta tasdiqlangan to'lov</div>
+              <div className="cyber-card" style={{ padding: '24px', textAlign: 'center', gridColumn: 'span 2', background: 'linear-gradient(135deg, rgba(0, 255, 102, 0.15) 0%, rgba(0, 240, 255, 0.15) 100%)', border: '1px solid rgba(0, 255, 102, 0.3)', boxShadow: '0 0 20px rgba(0, 255, 102, 0.1)' }}>
+                <div style={{ fontSize: '14px', color: 'var(--accent-green)', marginBottom: '8px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>💰 Jami Daromad</div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#fff', textShadow: '0 0 15px rgba(0, 255, 102, 0.5)' }}>{revenue.totalRevenue.toLocaleString('ru-RU')} UZS</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '8px' }}>{revenue.totalPayments} ta tasdiqlangan to'lov</div>
               </div>
             </div>
           </div>
@@ -318,11 +324,12 @@ export default function AdminView() {
         {activeTab === 'settings' && (
           <div>
             <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Sozlamalar</h2>
-            <form onSubmit={handleSaveSettings} className="card" style={{ padding: '20px' }}>
+            <form onSubmit={handleSaveSettings} className="cyber-card" style={{ padding: '20px' }}>
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontSize: '12px', opacity: 0.8, display: 'block', marginBottom: '5px' }}>Karta Raqami (To'lovlar uchun)</label>
                 <input 
-                  className="admin-input" 
+                  className="cyber-input" 
+                  style={{ width: '100%' }}
                   placeholder="masalan: 8600 1234 5678 9012" 
                   value={settings.cardNumber || ''} 
                   onChange={e => setSettings({...settings, cardNumber: e.target.value})} 
@@ -331,14 +338,15 @@ export default function AdminView() {
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontSize: '12px', opacity: 0.8, display: 'block', marginBottom: '5px' }}>SMS Kanal ID (To'lovlarni tekshirish uchun)</label>
                 <input 
-                  className="admin-input" 
+                  className="cyber-input" 
+                  style={{ width: '100%' }}
                   placeholder="-100..." 
                   value={settings.paymentChannelId || ''} 
                   onChange={e => setSettings({...settings, paymentChannelId: e.target.value})} 
                 />
                 <p style={{ fontSize: '11px', opacity: 0.6, marginTop: '5px' }}>Bot ushbu kanalda admin bo'lishi va kanalga kelgan to'lov haqidagi xabarlarni ko'ra olishi kerak.</p>
               </div>
-              <button type="submit" className="pay-btn" disabled={savingSettings}>
+              <button type="submit" className="neon-btn" disabled={savingSettings}>
                 {savingSettings ? <div className="spinner"></div> : <><Save size={16} style={{ display: 'inline', marginRight: '5px' }} /> Saqlash</>}
               </button>
             </form>
@@ -348,16 +356,16 @@ export default function AdminView() {
         {activeTab === 'broadcast' && (
           <div>
             <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Hammaga xabar yuborish</h2>
-            <form onSubmit={handleBroadcast} className="card" style={{ padding: '20px', background: '#151a28', border: '1px solid #2a3441', borderRadius: '16px' }}>
+            <form onSubmit={handleBroadcast} className="cyber-card" style={{ padding: '20px' }}>
               <textarea 
-                className="admin-input" 
-                style={{ height: '100px', resize: 'vertical', background: '#111827', border: '1px solid #374151' }}
+                className="cyber-input" 
+                style={{ height: '100px', width: '100%', resize: 'vertical', marginBottom: '16px' }}
                 placeholder="Xabar matni (barcha foydalanuvchilarga boradi)..." 
                 value={broadcastText} 
                 onChange={e => setBroadcastText(e.target.value)} 
                 required 
               />
-              <button type="submit" className="pay-btn" disabled={broadcasting} style={{ background: '#3b82f6' }}>
+              <button type="submit" className="neon-btn" disabled={broadcasting} style={{ background: 'linear-gradient(90deg, #1d4ed8, #3b82f6)' }}>
                 {broadcasting ? <div className="spinner"></div> : <><Send size={16} style={{ display: 'inline', marginRight: '5px' }} /> Yuborish</>}
               </button>
             </form>
@@ -436,35 +444,35 @@ export default function AdminView() {
         {activeTab === 'users' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Foydalanuvchilar</h2>
-              <span style={{ color: '#3b82f6', fontSize: '14px', fontWeight: '500' }}>{users.length} ta</span>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Foydalanuvchilar <span style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, var(--accent-cyan), transparent)' }}></span>
+              </h2>
+              <span style={{ color: 'var(--accent-cyan)', fontSize: '14px', fontWeight: '500' }}>{users.length} ta</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {users.map(user => {
-                // Determine joined date (using dummy date as it's not in user model, or just ID if numeric)
-                // For layout purposes we use a static string since it's just visual structure for now
                 const joinedDate = '16/06/2026';
                 return (
-                  <div key={user.id} className="user-card">
-                    <div className="user-card-top">
-                      <div className="user-avatar">
+                  <div key={user.id} className="payment-card" style={{ padding: '16px' }}>
+                    <div className="user-card-top" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px', marginBottom: '12px' }}>
+                      <div className="user-avatar" style={{ background: 'linear-gradient(135deg, var(--accent-cyan), #3b82f6)' }}>
                         {user.firstName ? user.firstName.charAt(0) : 'U'}
                       </div>
                       <div className="user-info">
-                        <div className="user-name">{user.firstName || 'Ismsiz'}</div>
-                        <div className="user-username">{user.username ? `@${user.username}` : ''}</div>
+                        <div className="user-name" style={{ color: '#fff', fontSize: '15px' }}>{user.firstName || 'Ismsiz'}</div>
+                        <div className="user-username" style={{ color: 'var(--accent-cyan)' }}>{user.username ? `@${user.username}` : ''}</div>
                       </div>
-                      <a href={`tg://user?id=${user.id}`} className="user-action-btn">
+                      <a href={`tg://user?id=${user.id}`} className="user-action-btn" style={{ background: 'rgba(0, 240, 255, 0.1)', color: 'var(--accent-cyan)', border: '1px solid rgba(0, 240, 255, 0.2)' }}>
                         <Send size={16} />
                       </a>
                     </div>
-                    <div className="user-card-middle">
-                      <div className="user-phone">{user.id}</div>
-                      <div className="user-badge">{user.subs?.length || 0} obuna</div>
+                    <div className="user-card-middle" style={{ marginBottom: '12px' }}>
+                      <div className="user-phone" style={{ color: 'var(--text-muted)' }}>ID: {user.id}</div>
+                      <div className="user-badge" style={{ background: 'rgba(0, 255, 102, 0.1)', color: 'var(--accent-green)', border: '1px solid rgba(0, 255, 102, 0.2)' }}>{user.subs?.length || 0} obuna</div>
                     </div>
-                    <div className="user-card-bottom">
-                      <Clock size={12} style={{ marginRight: '6px' }} />
-                      Qo'shilgan: {joinedDate}
+                    <div className="user-card-bottom" style={{ borderTop: 'none', margin: 0, padding: 0 }}>
+                      <Clock size={12} style={{ marginRight: '6px', color: 'var(--accent-cyan)' }} />
+                      <span style={{ color: 'var(--text-muted)' }}>Qo'shilgan: {joinedDate}</span>
                     </div>
                   </div>
                 );
@@ -475,21 +483,21 @@ export default function AdminView() {
 
         {activeTab === 'channels' && (
           <div>
-            <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Kanallar ({channels.length})</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>Kanallar ({channels.length})</h2>
             {/* Channels List */}
             <div className="channels">
               {channels.map((channel) => (
-                <div key={channel.id} className="card" style={{ marginBottom: '15px' }}>
+                <div key={channel.id} style={{ marginBottom: '20px' }}>
                   <div className="channel-header" style={{ marginBottom: '15px' }}>
-                    <div className="channel-icon">
-                      <Crown size={24} />
+                    <div className="glass-icon" style={{ width: 36, height: 36, borderRadius: 8 }}>
+                      <Crown size={20} color="#fff" />
                     </div>
                     <div className="channel-info" style={{ flexGrow: 1 }}>
-                      <h2>{channel.title}</h2>
-                      <p style={{ opacity: 0.6, fontSize: '12px' }}>ID: {channel.id}</p>
+                      <h2 style={{ fontSize: '16px', color: '#fff' }}>{channel.title}</h2>
+                      <p style={{ opacity: 0.6, fontSize: '11px' }}>ID: {channel.id}</p>
                     </div>
                     <button onClick={() => handleDeleteChannel(channel.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
 
@@ -499,9 +507,9 @@ export default function AdminView() {
                     {channel.plans.length === 0 ? <div style={{ fontSize: '12px', opacity: 0.6, marginBottom: '10px' }}>Tariflar yo'q</div> : null}
                     
                     {channel.plans.map(plan => (
-                      <div key={plan.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', padding: '10px', borderRadius: '8px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div key={plan.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(20, 22, 35, 0.6)', padding: '12px 16px', borderRadius: '12px', marginBottom: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <div>
-                          <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{plan.name}</div>
+                          <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#fff' }}>{plan.name}</div>
                           <div style={{ fontSize: '12px', color: 'var(--accent)' }}>{plan.price.toLocaleString('ru-RU')} UZS / {plan.duration} kun</div>
                         </div>
                         <button onClick={() => handleDeletePlan(plan.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
@@ -512,36 +520,40 @@ export default function AdminView() {
 
                     {/* Add Plan Button/Form */}
                     {activeChannelForPlan === channel.id ? (
-                      <form onSubmit={(e) => handleAddPlan(e, channel.id)} style={{ marginTop: '15px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '12px' }}>
+                      <form onSubmit={(e) => handleAddPlan(e, channel.id)} className="cyber-card" style={{ marginTop: '15px', padding: '16px' }}>
                         <input 
-                          className="admin-input" 
+                          className="cyber-input" 
+                          style={{ width: '100%', marginBottom: '10px' }}
                           placeholder="Tarif nomi (masalan: 1 Oylik)" 
                           value={newPlanName} onChange={e => setNewPlanName(e.target.value)} required 
                         />
                         <input 
-                          className="admin-input" 
+                          className="cyber-input" 
+                          style={{ width: '100%', marginBottom: '10px' }}
                           placeholder="Ta'rif (masalan: Barcha darslar)" 
                           value={newPlanDesc} onChange={e => setNewPlanDesc(e.target.value)} 
                         />
-                        <div style={{ display: 'flex', gap: '10px' }}>
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                           <input 
-                            className="admin-input" 
+                            className="cyber-input" 
+                            style={{ flex: 1 }}
                             type="number" placeholder="Narxi (UZS)" 
                             value={newPlanPrice} onChange={e => setNewPlanPrice(e.target.value)} required 
                           />
                           <input 
-                            className="admin-input" 
+                            className="cyber-input" 
+                            style={{ flex: 1 }}
                             type="number" placeholder="Muddat (kun)" 
                             value={newPlanDuration} onChange={e => setNewPlanDuration(e.target.value)} required 
                           />
                         </div>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                          <button type="submit" className="pay-btn" style={{ flex: 1, padding: '10px' }}>Saqlash</button>
-                          <button type="button" onClick={() => setActiveChannelForPlan(null)} className="pay-btn" style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }}>Bekor qilish</button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <button type="submit" className="btn-small-glow" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>Saqlash</button>
+                          <button type="button" onClick={() => setActiveChannelForPlan(null)} className="btn-small-glow" style={{ flex: 1, padding: '12px', justifyContent: 'center', background: 'transparent', border: '1px solid rgba(255,255,255,0.3)' }}>Bekor qilish</button>
                         </div>
                       </form>
                     ) : (
-                      <button onClick={() => setActiveChannelForPlan(channel.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '8px', color: 'var(--text-main)', cursor: 'pointer', marginTop: '10px' }}>
+                      <button onClick={() => setActiveChannelForPlan(channel.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '12px', color: 'var(--text-main)', cursor: 'pointer', marginTop: '10px', transition: 'all 0.2s' }}>
                         <Plus size={16} style={{ marginRight: '5px' }} /> Yangi tarif qo'shish
                       </button>
                     )}
@@ -551,21 +563,23 @@ export default function AdminView() {
             </div>
 
             {/* Add New Channel Form */}
-            <h2 style={{ fontSize: '18px', margin: '25px 0 15px 0' }}>Yangi kanal qo'shish</h2>
-            <form onSubmit={handleAddChannel} className="card" style={{ padding: '20px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: '30px 0 15px 0' }}>Yangi kanal qo'shish</h2>
+            <form onSubmit={handleAddChannel} className="cyber-card" style={{ padding: '20px' }}>
               <p style={{ fontSize: '12px', opacity: 0.7, marginBottom: '15px' }}>Kanal ID raqamini kiritish uchun oldin botni kanalingizga admin qiling. ID odatda "-100" bilan boshlanadi.</p>
               <input 
-                className="admin-input" 
+                className="cyber-input" 
+                style={{ width: '100%', marginBottom: '10px' }}
                 placeholder="Kanal ID (masalan: -10012345678)" 
                 value={newChannelId} onChange={e => setNewChannelId(e.target.value)} required 
               />
               <input 
-                className="admin-input" 
+                className="cyber-input" 
+                style={{ width: '100%', marginBottom: '15px' }}
                 placeholder="Kanal nomi (masalan: VIP Darslar)" 
                 value={newChannelTitle} onChange={e => setNewChannelTitle(e.target.value)} required 
               />
-              <button type="submit" className="pay-btn" style={{ marginTop: '10px' }}>
-                <Plus size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }} /> Qo'shish
+              <button type="submit" className="btn-small-glow" style={{ width: '100%', padding: '12px', justifyContent: 'center' }}>
+                <Plus size={18} style={{ marginRight: '5px' }} /> Qo'shish
               </button>
             </form>
           </div>
@@ -588,18 +602,18 @@ export default function AdminView() {
                   fetchData();
                 } else alert('Xatolik');
               } catch { alert('Xatolik'); }
-            }} className="card" style={{ padding: '20px', background: '#151a28', border: '1px solid #2a3441', borderRadius: '16px', marginBottom: '20px' }}>
-              <input className="admin-input" placeholder="Promo kod (masalan: SALE50)" value={newPromoCode} onChange={e => setNewPromoCode(e.target.value)} required style={{ textTransform: 'uppercase' }} />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <select className="admin-input" value={newPromoType} onChange={e => setNewPromoType(e.target.value)} style={{ background: '#111827', border: '1px solid #374151', color: '#fff' }}>
+            }} className="cyber-card" style={{ padding: '20px', marginBottom: '24px' }}>
+              <input className="cyber-input" style={{ width: '100%', marginBottom: '10px', textTransform: 'uppercase' }} placeholder="PROMO KOD (masalan: SALE50)" value={newPromoCode} onChange={e => setNewPromoCode(e.target.value)} required />
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <select className="cyber-input" style={{ width: '110px', cursor: 'pointer' }} value={newPromoType} onChange={e => setNewPromoType(e.target.value)}>
                   <option value="percent">Foiz (%)</option>
-                  <option value="fixed">Summa (UZS)</option>
+                  <option value="fixed">Summa</option>
                 </select>
-                <input className="admin-input" type="number" placeholder="Qiymat" value={newPromoValue} onChange={e => setNewPromoValue(e.target.value)} required />
+                <input className="cyber-input" style={{ flex: 1 }} type="number" placeholder="Qiymat" value={newPromoValue} onChange={e => setNewPromoValue(e.target.value)} required />
               </div>
-              <input className="admin-input" type="number" placeholder="Maks ishlatilish (0 = cheksiz)" value={newPromoMaxUses} onChange={e => setNewPromoMaxUses(e.target.value)} />
-              <button type="submit" className="pay-btn" style={{ background: '#f472b6' }}>
-                <Plus size={16} style={{ display: 'inline', marginRight: '5px' }} /> Promo yaratish
+              <input className="cyber-input" style={{ width: '100%', marginBottom: '15px' }} type="number" placeholder="Maks ishlatilish (0 = cheksiz)" value={newPromoMaxUses} onChange={e => setNewPromoMaxUses(e.target.value)} />
+              <button type="submit" className="btn-small-glow" style={{ width: '100%', padding: '12px', justifyContent: 'center', background: 'linear-gradient(135deg, #f472b6, #e11d48)', boxShadow: '0 0 15px rgba(244, 114, 182, 0.4)' }}>
+                <Plus size={16} style={{ marginRight: '5px' }} /> Promo yaratish
               </button>
             </form>
 
@@ -608,20 +622,20 @@ export default function AdminView() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {promos.map(p => (
-                  <div key={p.id} className="user-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(20, 22, 35, 0.6)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div>
-                      <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#f472b6' }}>{p.code}</div>
-                      <div style={{ fontSize: '13px', color: '#9ca3af' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#f472b6', textShadow: '0 0 10px rgba(244,114,182,0.3)' }}>{p.code}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
                         {p.discountType === 'percent' ? `${p.discountValue}% chegirma` : `${p.discountValue.toLocaleString()} UZS chegirma`}
-                        {p.maxUses > 0 ? ` | ${p.usedCount}/${p.maxUses} ishlatilgan` : ` | ${p.usedCount} marta ishlatilgan`}
+                        {p.maxUses > 0 ? ` | ${p.usedCount}/${p.maxUses} ta ishlatilgan` : ` | ${p.usedCount} marta ishlatilgan`}
                       </div>
                     </div>
                     <button onClick={async () => {
                       if (!confirm('Bu promo-kodni o\'chirasizmi?')) return;
                       await fetch(`${API_URL}/admin/promos/${p.id}`, { method: 'DELETE', headers });
                       fetchData();
-                    }} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                      <Trash2 size={18} />
+                    }} style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', cursor: 'pointer', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 ))}

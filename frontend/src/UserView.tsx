@@ -115,7 +115,11 @@ function UserView() {
         <div className="logo-text">kassa bot</div>
         <div className="header-controls">
           <div className="icon-btn">✨</div>
-          <div className="icon-btn">✕</div>
+          {tg?.initDataUnsafe?.user?.photo_url ? (
+            <img src={tg.initDataUnsafe.user.photo_url} alt="Profile" style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)' }} />
+          ) : (
+            <div className="icon-btn">{tg?.initDataUnsafe?.user?.first_name?.charAt(0) || 'U'}</div>
+          )}
         </div>
       </header>
 
