@@ -70,6 +70,27 @@ function UserView() {
       .catch(err => console.error(err));
   }, []);
 
+  const [timeLeft, setTimeLeft] = useState<number>(180);
+
+  useEffect(() => {
+    if (!activePayment) return;
+
+    const createdAtTime = new Date(activePayment.createdAt).getTime();
+    const expiresAtTime = createdAtTime + 3 * 60 * 1000; // 3 minutes in ms
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const difference = Math.max(0, Math.floor((expiresAtTime - now) / 1000));
+      setTimeLeft(difference);
+    };
+
+    updateTimer();
+    const intervalId = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [activePayment]);
+
+
   const handlePay = async () => {
     if (!selectedChannel || !selectedPlan || paying) return;
     
@@ -150,8 +171,40 @@ function UserView() {
               </div>
             </div>
 
+            {/* Countdown Timer */}
+            <div style={{ 
+              background: timeLeft > 30 ? 'rgba(0, 240, 255, 0.05)' : 'rgba(255, 0, 85, 0.05)', 
+              border: `1px dashed ${timeLeft > 30 ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 0, 85, 0.3)'}`, 
+              padding: '12px 16px', 
+              borderRadius: '12px', 
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              boxShadow: timeLeft > 30 ? 'inset 0 0 10px rgba(0, 240, 255, 0.05)' : '0 0 15px rgba(255, 0, 85, 0.1), inset 0 0 10px rgba(255, 0, 85, 0.05)',
+              transition: 'all 0.3s ease'
+            }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>To'lov tugash muddati:</span>
+              <span style={{ 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                color: timeLeft > 30 ? 'var(--accent-cyan)' : 'var(--accent-red)',
+                textShadow: timeLeft > 30 ? '0 0 10px rgba(0, 240, 255, 0.4)' : '0 0 10px rgba(255, 0, 85, 0.4)',
+                fontFamily: 'monospace'
+              }}>
+                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+
+            {timeLeft === 0 && (
+              <div style={{ color: 'var(--accent-red)', fontSize: '13px', fontWeight: '500', marginBottom: '15px', textShadow: '0 0 10px rgba(255, 0, 85, 0.2)' }}>
+                ⚠️ To'lov muddati tugadi. Bu summa va qo'shilgan raqam boshqa foydalanuvchilarga berildi. Iltimos, "Ortga qaytish" tugmasini bosib qaytadan urinib ko'ring.
+              </div>
+            )}
+
             <button 
               className="neon-btn" 
+              disabled={timeLeft === 0}
               onClick={() => {
                 if (tg) {
                   tg.showAlert("To'lov qilganingizdan so'ng bot sizga avtomatik ravishda yopiq kanal havolasini yuboradi. Kuting...");
@@ -161,13 +214,13 @@ function UserView() {
                 }
               }}
             >
-              Men to'lov qildim
+              {timeLeft === 0 ? "Vaqt tugadi" : "Men to'lov qildim"}
             </button>
             <button 
               style={{ marginTop: '15px', background: 'transparent', border: 'none', color: 'var(--text-main)', opacity: 0.6, cursor: 'pointer' }}
               onClick={() => setActivePayment(null)}
             >
-              Bekor qilish
+              {timeLeft === 0 ? "Ortga qaytish" : "Bekor qilish"}
             </button>
           </div>
         ) : (

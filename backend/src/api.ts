@@ -85,8 +85,31 @@ app.post('/api/create-payment', async (req, res) => {
       }
     }
 
-    // Generate random suffix 1 to 99
-    const randomSuffix = Math.floor(Math.random() * 99) + 1;
+    // Generate unique random suffix 1 to 99 that is not currently busy for PENDING payments
+    const pendingPayments = await prisma.payment.findMany({
+      where: { status: 'PENDING' },
+      select: { amount: true }
+    });
+    const busyAmounts = new Set(pendingPayments.map(p => p.amount));
+
+    let randomSuffix = 0;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    while (attempts < maxAttempts) {
+      const testSuffix = Math.floor(Math.random() * 99) + 1;
+      const testAmount = basePrice + testSuffix;
+      if (!busyAmounts.has(testAmount)) {
+        randomSuffix = testSuffix;
+        break;
+      }
+      attempts++;
+    }
+
+    if (randomSuffix === 0) {
+      randomSuffix = Math.floor(Math.random() * 99) + 1;
+    }
+
     const finalAmount = basePrice + randomSuffix;
 
     const payment = await prisma.payment.create({

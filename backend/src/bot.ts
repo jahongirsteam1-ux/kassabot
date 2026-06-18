@@ -344,16 +344,16 @@ export function startExpiryWarningCron() {
   }, 6 * 60 * 60 * 1000); // Every 6 hours
 }
 
-// 3. Auto-cancel payments older than 5 minutes (every 1 minute)
+// 3. Auto-cancel payments older than 3 minutes (every 1 minute)
 export function startPaymentTimeoutCron() {
   setInterval(async () => {
     try {
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
 
       const expiredPayments = await prisma.payment.findMany({
         where: {
           status: 'PENDING',
-          createdAt: { lt: fiveMinutesAgo }
+          createdAt: { lt: threeMinutesAgo }
         }
       });
 
@@ -361,7 +361,7 @@ export function startPaymentTimeoutCron() {
         await prisma.payment.updateMany({
           where: {
             status: 'PENDING',
-            createdAt: { lt: fiveMinutesAgo }
+            createdAt: { lt: threeMinutesAgo }
           },
           data: { status: 'CANCELLED' }
         });
@@ -371,12 +371,12 @@ export function startPaymentTimeoutCron() {
           try {
             await bot.telegram.sendMessage(
               pay.userId,
-              `⏰ To'lov muddati tugadi (5 daqiqa). To'lov bekor qilindi.\n\nQaytadan urinish uchun /start buyrug'ini yuboring.`
+              `⏰ To'lov muddati tugadi (3 daqiqa). To'lov bekor qilindi.\n\nQaytadan urinish uchun /start buyrug'ini yuboring.`
             );
           } catch (err) {} // user blocked bot
         }
 
-        console.log(`[CRON] ${expiredPayments.length} ta to'lov 5 daqiqadan oshgani uchun bekor qilindi.`);
+        console.log(`[CRON] ${expiredPayments.length} ta to'lov 3 daqiqadan oshgani uchun bekor qilindi.`);
       }
     } catch (err) {
       console.error('[CRON] Payment timeout error:', err);
