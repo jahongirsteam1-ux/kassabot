@@ -221,7 +221,7 @@ app.post('/api/admin/channels/:channelId/plans', requireAdmin, async (req, res) 
         description,
         price: Number(price),
         duration: Number(duration),
-        priceType: 'STARS'
+        priceType: 'UZS'
       }
     });
     res.json(plan);
@@ -296,6 +296,8 @@ app.post('/api/admin/broadcast', requireAdmin, async (req, res) => {
       imageBuffer = Buffer.from(base64Data, 'base64');
     }
     
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    let i = 0;
     for (const user of users) {
       try {
         if (imageBuffer) {
@@ -306,6 +308,10 @@ app.post('/api/admin/broadcast', requireAdmin, async (req, res) => {
         successCount++;
       } catch (e) {
         // user blocked bot etc.
+      }
+      i++;
+      if (i % 30 === 0) {
+        await sleep(1000);
       }
     }
     
@@ -440,7 +446,7 @@ app.post('/api/admin/payments/:id/confirm', requireAdmin, async (req, res) => {
     try {
       const inviteLink = await bot.telegram.createChatInviteLink(payment.plan.channelId, {
         member_limit: 1,
-        expire_date: Math.floor(Date.now() / 1000) + 86400,
+        expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
       });
 
       await bot.telegram.sendMessage(

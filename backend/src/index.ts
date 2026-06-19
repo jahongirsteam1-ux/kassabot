@@ -30,8 +30,8 @@ async function bootstrap() {
           channelId: ch.id,
           name: "1 Oylik VIP Obuna",
           description: "Barcha maxfiy darslar va materiallarga 30 kunlik ruxsat",
-          price: 100, // 100 Telegram Stars
-          priceType: "STARS",
+          price: 100000, // 100,000 UZS
+          priceType: "UZS",
           duration: 30
         }
       });
@@ -40,8 +40,8 @@ async function bootstrap() {
           channelId: ch.id,
           name: "3 Oylik VIP Obuna",
           description: "90 kunlik ruxsat + shaxsiy ustoz yordami",
-          price: 250, // 250 Telegram Stars
-          priceType: "STARS",
+          price: 250000, // 250,000 UZS
+          priceType: "UZS",
           duration: 90
         }
       });

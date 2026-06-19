@@ -97,13 +97,19 @@ function UserView() {
     setPaying(true);
     
     try {
-      const userId = tg?.initDataUnsafe?.user?.id || 'dummy_user';
+      const userId = tg?.initDataUnsafe?.user?.id;
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!userId && !isDev) {
+        alert("Xatolik: Iltimos, sahifani faqat Telegram ilovasi orqali oching!");
+        return;
+      }
+      const finalUserId = userId || 'dummy_user';
 
       // Create or get pending payment
       const res = await fetch(`${API_URL}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelId: selectedChannel, planId: selectedPlan, userId, promoCode: promoCode || undefined })
+        body: JSON.stringify({ channelId: selectedChannel, planId: selectedPlan, userId: finalUserId, promoCode: promoCode || undefined })
       });
       
       const data = await res.json();

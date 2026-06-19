@@ -143,7 +143,7 @@ bot.on('channel_post', async (ctx) => {
       try {
         const inviteLink = await ctx.telegram.createChatInviteLink(payment.plan.channelId, {
           member_limit: 1,
-          expire_date: Math.floor(Date.now() / 1000) + 86400,
+          expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
         });
 
         await bot.telegram.sendMessage(
@@ -209,7 +209,7 @@ bot.on('callback_query', async (ctx) => {
       try {
         const inviteLink = await bot.telegram.createChatInviteLink(payment.plan.channelId, {
           member_limit: 1,
-          expire_date: Math.floor(Date.now() / 1000) + 86400,
+          expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
         });
 
         await bot.telegram.sendMessage(
