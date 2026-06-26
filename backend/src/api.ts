@@ -453,9 +453,13 @@ app.post('/api/admin/payments/:id/confirm', requireAdmin, async (req, res) => {
         expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
       });
 
+      const durationText = payment.plan.duration === 0 
+        ? "butun umr" 
+        : `${payment.plan.duration} kun`;
+
       await bot.telegram.sendMessage(
         payment.userId, 
-        `✅ To'lovingiz (${payment.amount} so'm) admin tomonidan tasdiqlandi!\n\nKanalga kirish uchun maxsus havola (faqat siz uchun, uni boshqalarga bermang):\n${inviteLink.invite_link}`
+        `✅ To'lovingiz (${payment.amount} so'm) admin tomonidan tasdiqlandi!\n\nObunangiz sotib olingan vaqtdan boshlab ${durationText} amal qiladi.\n\nKanalga kirish uchun maxsus havola (faqat siz uchun, uni boshqalarga bermang):\n${inviteLink.invite_link}`
       );
     } catch (err) {
       console.error("Manual invite link error:", err);

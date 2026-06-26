@@ -1,6 +1,7 @@
 import { Telegraf, Markup } from 'telegraf';
 import { prisma } from './prisma';
 import 'dotenv/config';
+import cron from 'node-cron';
 
 export const bot = new Telegraf(process.env.BOT_TOKEN || 'dummy');
 
@@ -188,9 +189,13 @@ bot.on('channel_post', async (ctx) => {
           expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
         });
 
+        const durationText = payment.plan.duration === 0 
+          ? "butun umr" 
+          : `${payment.plan.duration} kun`;
+
         await bot.telegram.sendMessage(
           payment.userId, 
-          `✅ To'lovingiz (${payment.amount} so'm) tasdiqlandi!\n\nKanalga kirish uchun maxsus havola (faqat siz uchun, uni boshqalarga bermang):\n${inviteLink.invite_link}`
+          `✅ To'lovingiz (${payment.amount} so'm) tasdiqlandi!\n\nObunangiz sotib olingan vaqtdan boshlab ${durationText} amal qiladi.\n\nKanalga kirish uchun maxsus havola (faqat siz uchun, uni boshqalarga bermang):\n${inviteLink.invite_link}`
         );
       } catch (err) {
         console.error("Auto confirmation error for payment ID " + payment.id + ":", err);
@@ -286,9 +291,13 @@ bot.on('callback_query', async (ctx) => {
           expire_date: Math.floor(Date.now() / 1000) + 7 * 86400,
         });
 
+        const durationText = payment.plan.duration === 0 
+          ? "butun umr" 
+          : `${payment.plan.duration} kun`;
+
         await bot.telegram.sendMessage(
           payment.userId,
-          `✅ To'lovingiz (${payment.amount} so'm) admin tomonidan tasdiqlandi!\n\nKanalga kirish havolasi:\n${inviteLink.invite_link}`
+          `✅ To'lovingiz (${payment.amount} so'm) admin tomonidan tasdiqlandi!\n\nObunangiz sotib olingan vaqtdan boshlab ${durationText} amal qiladi.\n\nKanalga kirish havolasi:\n${inviteLink.invite_link}`
         );
       } catch (err) {
         console.error('Invite link error:', err);
@@ -425,21 +434,47 @@ export function startSubscriptionCron() {
   }, 60 * 60 * 1000); // Every 1 hour
 }
 
-// 2. Warn users 1 day before expiry (every 6 hours)
+// Helper to get tomorrow's start and end dates in Tashkent timezone converted to UTC
+function getTashkentTomorrowRange() {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Tashkent',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  });
+  const parts = formatter.formatToParts(now);
+  const year = parseInt(parts.find(p => p.type === 'year')!.value);
+  const month = parseInt(parts.find(p => p.type === 'month')!.value);
+  const day = parseInt(parts.find(p => p.type === 'day')!.value);
+
+  // Tashkent today at 00:00:00
+  const todayTashkentStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T00:00:00+05:00`;
+  const todayTashkent = new Date(todayTashkentStr);
+
+  // Tomorrow start in Tashkent
+  const tomorrowStart = new Date(todayTashkent.getTime() + 24 * 60 * 60 * 1000);
+  // Day after tomorrow start in Tashkent
+  const dayAfterTomorrowStart = new Date(todayTashkent.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+  return {
+    start: tomorrowStart,
+    end: dayAfterTomorrowStart
+  };
+}
+
+// 2. Warn users 1 day before expiry (3 times a day at 09:00, 15:00, 19:00 Tashkent time)
 export function startExpiryWarningCron() {
-  setInterval(async () => {
+  cron.schedule('0 9,15,19 * * *', async () => {
     try {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const today = new Date();
+      const { start, end } = getTashkentTomorrowRange();
 
       const expiringSoon = await prisma.subscription.findMany({
         where: {
           status: 'ACTIVE',
           expiresAt: {
-            gte: today,
-            lte: tomorrow
+            gte: start,
+            lt: end
           }
         },
         include: { channel: true }
@@ -451,12 +486,15 @@ export function startExpiryWarningCron() {
             sub.userId,
             `⚠️ Diqqat! "${sub.channel.title}" kanaliga obunangiz ertaga tugaydi!\n\nQayta obuna bo'lish uchun /start buyrug'ini yuboring.`
           );
+          console.log(`[Expiry Warning] Sent warning to user ${sub.userId} for channel ${sub.channelId}`);
         } catch (err) {} // user blocked bot
       }
     } catch (err) {
       console.error('[CRON] Expiry warning error:', err);
     }
-  }, 6 * 60 * 60 * 1000); // Every 6 hours
+  }, {
+    timezone: "Asia/Tashkent"
+  });
 }
 
 // 3. Auto-cancel payments older than 15 minutes (every 1 minute)
