@@ -257,12 +257,12 @@ app.get('/api/admin/settings', async (req, res) => {
 
 // Update settings
 app.post('/api/admin/settings', requireAdmin, async (req, res) => {
-  const { cardNumber, paymentChannelId } = req.body;
+  const { paymentChannelId } = req.body;
   try {
     const settings = await prisma.settings.upsert({
       where: { id: 1 },
-      update: { cardNumber, paymentChannelId },
-      create: { id: 1, cardNumber, paymentChannelId }
+      update: { paymentChannelId },
+      create: { id: 1, paymentChannelId }
     });
     res.json(settings);
   } catch (err) {
@@ -621,7 +621,7 @@ app.get('/api/settings', async (req, res) => {
     const activeCard = await prisma.card.findFirst({ where: { isActive: true } });
     
     res.json({ 
-      cardNumber: activeCard ? activeCard.cardNumber : settings.cardNumber,
+      cardNumber: activeCard ? activeCard.cardNumber : '',
       rubRate: settings.rubRate || 155
     });
   } catch (err) {

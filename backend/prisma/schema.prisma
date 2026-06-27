@@ -46,7 +46,6 @@ model Subscription {
 
 model Settings {
   id               Int     @id @default(1)
-  cardNumber       String?
   paymentChannelId String?
   rubRate          Float   @default(155)
 }

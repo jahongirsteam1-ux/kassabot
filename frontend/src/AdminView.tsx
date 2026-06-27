@@ -30,7 +30,7 @@ export default function AdminView() {
   const [activeTab, setActiveTab] = useState('payments'); // payments, channels, cards, users, broadcast, stats, settings
 
   // Settings
-  const [settings, setSettings] = useState({ cardNumber: '', paymentChannelId: '' });
+  const [settings, setSettings] = useState({ paymentChannelId: '' });
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Broadcast
@@ -471,18 +471,6 @@ export default function AdminView() {
           <div>
             <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Sozlamalar</h2>
             <form onSubmit={handleSaveSettings} className="cyber-card" style={{ padding: '20px' }}>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ fontSize: '12px', opacity: 0.8, display: 'block', marginBottom: '5px' }}>Rubl kursi (1 RUB = necha so'm)</label>
-                <input 
-                  className="cyber-input" 
-                  style={{ width: '100%' }}
-                  type="number"
-                  placeholder="masalan: 155" 
-                  value={(settings as any).rubRate || 155} 
-                  onChange={e => setSettings({...settings, rubRate: Number(e.target.value)} as any)} 
-                />
-                <p style={{ fontSize: '11px', opacity: 0.6, marginTop: '5px' }}>Bot buni har 25 daqiqada avtomat yangilaydi (Markaziy bank orqali).</p>
-              </div>
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontSize: '12px', opacity: 0.8, display: 'block', marginBottom: '5px' }}>SMS Kanal ID (To'lovlarni tekshirish uchun)</label>
                 <input 
