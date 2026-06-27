@@ -375,8 +375,8 @@ export default function AdminView() {
 
         {activeTab === 'cards' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>Karta va Limitlar</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 className="gradient-title" style={{ fontSize: '24px', margin: 0, textShadow: 'none' }}>Karta va Limitlar</h2>
               <button 
                 onClick={async () => {
                   if (!confirm("Haqiqatan ham keyingi kartaga o'tkazmoqchimisiz?")) return;
@@ -390,48 +390,47 @@ export default function AdminView() {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gap: '20px', marginBottom: '32px' }}>
               {cards.map(card => (
-                <div key={card.id} className="cyber-card" style={{ padding: '16px', border: card.isActive ? '1px solid var(--accent-green)' : '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div key={card.id} className={`credit-card-item ${card.isActive ? 'active-card' : ''}`}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontWeight: 'bold', fontSize: '16px', color: card.isActive ? 'var(--accent-green)' : '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: '700', fontSize: '18px', color: card.isActive ? '#00ff66' : '#fff', letterSpacing: '1px' }}>
                           Slot {card.slot}: {card.cardNumber}
                         </span>
-                        {card.isActive && <div style={{ fontSize: '10px', background: 'var(--accent-green)', color: '#000', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>FAOL</div>}
+                        {card.isActive && <div style={{ fontSize: '11px', background: 'var(--accent-green)', color: '#000', padding: '3px 8px', borderRadius: '6px', fontWeight: '800', boxShadow: '0 0 10px rgba(0,255,102,0.4)' }}>FAOL</div>}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{card.bankName} - {card.cardHolder}</div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>{card.bankName} - {card.cardHolder}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {!card.isActive && (
                         <button onClick={async () => {
                           await fetch(`${API_URL}/admin/cards/${card.id}/activate`, { method: 'POST', headers });
                           fetchData();
-                        }} style={{ fontSize: '12px', background: 'transparent', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }}>Faollashtirish</button>
+                        }} className="action-btn activate">Faollashtirish</button>
                       )}
                       <button onClick={async () => {
                         if (!confirm("Limitni nolga tushirasizmi?")) return;
                         await fetch(`${API_URL}/admin/cards/${card.id}/reset`, { method: 'POST', headers });
                         fetchData();
-                      }} style={{ fontSize: '12px', background: 'transparent', border: '1px solid #f59e0b', color: '#f59e0b', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }}>Reset</button>
+                      }} className="action-btn reset">Reset</button>
                       <button onClick={async () => {
                         if (!confirm("Kartani o'chirasizmi?")) return;
                         await fetch(`${API_URL}/admin/cards/${card.id}`, { method: 'DELETE', headers });
                         fetchData();
-                      }} style={{ fontSize: '12px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '4px 8px', borderRadius: '6px', cursor: 'pointer' }}><Trash2 size={14}/></button>
+                      }} className="action-btn delete"><Trash2 size={16}/></button>
                     </div>
                   </div>
                   
                   {/* Progress bar */}
-                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '4px' }}>
-                    <div style={{ 
+                  <div className="progress-track" style={{ marginBottom: '8px' }}>
+                    <div className="progress-fill" style={{ 
                       width: `${Math.min(100, (card.transferCount / card.maxTransfers) * 100)}%`, 
-                      height: '100%', 
-                      background: (card.transferCount >= card.maxTransfers) ? 'var(--accent-red)' : 'var(--accent-cyan)' 
+                      background: (card.transferCount >= card.maxTransfers) ? 'var(--accent-red)' : (card.isActive ? 'var(--accent-green)' : 'var(--accent-cyan)') 
                     }}></div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>
                     <span>{card.transferCount} tushum</span>
                     <span>Limit: {card.maxTransfers}</span>
                   </div>
@@ -439,7 +438,7 @@ export default function AdminView() {
               ))}
             </div>
 
-            <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>Yangi karta qo'shish</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: '#e0b3ff' }}>Yangi karta qo'shish</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
               try {
