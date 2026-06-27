@@ -390,49 +390,50 @@ export default function AdminView() {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gap: '16px', marginBottom: '32px' }}>
               {cards.map(card => (
                 <div key={card.id} className={`credit-card-item ${card.isActive ? 'active-card' : ''}`}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: '700', fontSize: '18px', color: card.isActive ? '#00ff66' : '#fff', letterSpacing: '1px' }}>
-                          Slot {card.slot}: {card.cardNumber}
-                        </span>
-                        {card.isActive && <div style={{ fontSize: '11px', background: 'var(--accent-green)', color: '#000', padding: '3px 8px', borderRadius: '6px', fontWeight: '800', boxShadow: '0 0 10px rgba(0,255,102,0.4)' }}>FAOL</div>}
-                      </div>
-                      <div style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>{card.bankName} - {card.cardHolder}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      {!card.isActive && (
-                        <button onClick={async () => {
-                          await fetch(`${API_URL}/admin/cards/${card.id}/activate`, { method: 'POST', headers });
-                          fetchData();
-                        }} className="action-btn activate">Faollashtirish</button>
-                      )}
-                      <button onClick={async () => {
-                        if (!confirm("Limitni nolga tushirasizmi?")) return;
-                        await fetch(`${API_URL}/admin/cards/${card.id}/reset`, { method: 'POST', headers });
-                        fetchData();
-                      }} className="action-btn reset">Reset</button>
-                      <button onClick={async () => {
-                        if (!confirm("Kartani o'chirasizmi?")) return;
-                        await fetch(`${API_URL}/admin/cards/${card.id}`, { method: 'DELETE', headers });
-                        fetchData();
-                      }} className="action-btn delete"><Trash2 size={16}/></button>
-                    </div>
+                  {/* Top row: slot + badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: '700', fontSize: '15px', color: card.isActive ? '#00ff66' : '#fff', letterSpacing: '0.5px', wordBreak: 'break-all' }}>
+                      Slot {card.slot}: {card.cardNumber}
+                    </span>
+                    {card.isActive && <div style={{ flexShrink: 0, fontSize: '10px', background: 'var(--accent-green)', color: '#000', padding: '2px 7px', borderRadius: '5px', fontWeight: '800', boxShadow: '0 0 8px rgba(0,255,102,0.4)' }}>FAOL</div>}
                   </div>
-                  
+
+                  {/* Bank info */}
+                  <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px' }}>{card.bankName} — {card.cardHolder}</div>
+
                   {/* Progress bar */}
-                  <div className="progress-track" style={{ marginBottom: '8px' }}>
+                  <div className="progress-track" style={{ marginBottom: '6px' }}>
                     <div className="progress-fill" style={{ 
                       width: `${Math.min(100, (card.transferCount / card.maxTransfers) * 100)}%`, 
                       background: (card.transferCount >= card.maxTransfers) ? 'var(--accent-red)' : (card.isActive ? 'var(--accent-green)' : 'var(--accent-cyan)') 
                     }}></div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
                     <span>{card.transferCount} tushum</span>
                     <span>Limit: {card.maxTransfers}</span>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {!card.isActive && (
+                      <button onClick={async () => {
+                        await fetch(`${API_URL}/admin/cards/${card.id}/activate`, { method: 'POST', headers });
+                        fetchData();
+                      }} className="action-btn activate" style={{ flex: 1 }}>Faollashtirish</button>
+                    )}
+                    <button onClick={async () => {
+                      if (!confirm("Limitni nolga tushirasizmi?")) return;
+                      await fetch(`${API_URL}/admin/cards/${card.id}/reset`, { method: 'POST', headers });
+                      fetchData();
+                    }} className="action-btn reset" style={{ flex: 1 }}>⟳ Reset</button>
+                    <button onClick={async () => {
+                      if (!confirm("Kartani o'chirasizmi?")) return;
+                      await fetch(`${API_URL}/admin/cards/${card.id}`, { method: 'DELETE', headers });
+                      fetchData();
+                    }} className="action-btn delete"><Trash2 size={15}/></button>
                   </div>
                 </div>
               ))}
@@ -452,16 +453,22 @@ export default function AdminView() {
                   fetchData();
                 } else alert('Xatolik');
               } catch { alert('Xatolik'); }
-            }} className="cyber-card" style={{ padding: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8px', marginBottom: '8px' }}>
-                <input className="cyber-input" placeholder="Slot raqami (1, 2, 3)" value={newCardSlot} onChange={e => setNewCardSlot(e.target.value)} required type="number" />
-                <input className="cyber-input" placeholder="Karta raqami" value={newCardNumber} onChange={e => setNewCardNumber(e.target.value)} required />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+            }} style={{ 
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              background: 'rgba(20, 22, 35, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px'
+            }}>
+              <input className="cyber-input" style={{ width: '100%' }} placeholder="Slot raqami (1, 2, 3)" value={newCardSlot} onChange={e => setNewCardSlot(e.target.value)} required type="number" />
+              <input className="cyber-input" style={{ width: '100%' }} placeholder="Karta raqami" value={newCardNumber} onChange={e => setNewCardNumber(e.target.value)} required />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <input className="cyber-input" placeholder="Egasi (ism)" value={newCardHolder} onChange={e => setNewCardHolder(e.target.value)} />
                 <input className="cyber-input" placeholder="Bank nomi" value={newCardBank} onChange={e => setNewCardBank(e.target.value)} />
               </div>
-              <button type="submit" className="neon-btn" style={{ width: '100%' }}>Qo'shish</button>
+              <button type="submit" className="neon-btn" style={{ width: '100%', marginTop: '4px' }}>Qo'shish</button>
             </form>
           </div>
         )}
