@@ -45,16 +45,17 @@ async function checkMandatorySubscription(userId: number): Promise<{ ok: boolean
 }
 
 async function sendSubscriptionPrompt(ctx: any, missing: any[]) {
-  const buttons = missing.map((ch: any) => [
+  const urlButtons: any[] = missing.map((ch: any) => [
     Markup.button.url(`📢 ${ch.title}`, ch.inviteLink || `https://t.me/${ch.channelId.replace('@', '')}`)
   ]);
-  buttons.push([Markup.button.callback('✅ Tekshirish', 'check_subscription')]);
+  const checkButton: any[] = [[Markup.button.callback('✅ Tekshirish', 'check_subscription')]];
+  const allButtons = [...urlButtons, ...checkButton];
   
   await ctx.reply(
     `⚠️ Botdan foydalanish uchun quyidagi kanal(lar)ga obuna bo'lishingiz shart:\n\n` +
     missing.map((ch: any) => `• ${ch.title}`).join('\n') +
     `\n\nObuna bo'lgach, "✅ Tekshirish" tugmasini bosing.`,
-    Markup.inlineKeyboard(buttons)
+    Markup.inlineKeyboard(allButtons as any)
   );
 }
 
