@@ -439,19 +439,28 @@ export default function AdminView() {
               ))}
             </div>
 
-            <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: '#e0b3ff' }}>Yangi karta qo'shish</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px', color: '#e0b3ff' }}>Yangi karta qo'shish</h3>
+            {cards.length >= 10 && (
+              <div style={{ marginBottom: '12px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,0,85,0.1)', border: '1px solid rgba(255,0,85,0.3)', fontSize: '13px', color: '#ff6b9d' }}>
+                ⚠️ Maksimal 10 ta karta qo'shilgan. Yangi karta qo'shish uchun biron kartani o'chiring.
+              </div>
+            )}
             <form onSubmit={async (e) => {
               e.preventDefault();
+              if (cards.length >= 10) return alert('Maksimum 10 ta karta qo\'shish mumkin');
               try {
                 const res = await fetch(`${API_URL}/admin/cards`, {
                   method: 'POST',
                   headers,
-                  body: JSON.stringify({ slot: newCardSlot, cardNumber: newCardNumber, cardHolder: newCardHolder, bankName: newCardBank, maxTransfers: 35 })
+                  body: JSON.stringify({ slot: newCardSlot, cardNumber: newCardNumber, cardHolder: newCardHolder, bankName: newCardBank, maxTransfers: 40 })
                 });
+                const data = await res.json();
                 if (res.ok) {
                   setNewCardSlot(''); setNewCardNumber(''); setNewCardHolder(''); setNewCardBank('');
                   fetchData();
-                } else alert('Xatolik');
+                } else {
+                  alert(data.error || 'Xatolik');
+                }
               } catch { alert('Xatolik'); }
             }} style={{ 
               padding: '20px',
@@ -460,15 +469,18 @@ export default function AdminView() {
               gap: '10px',
               background: 'rgba(20, 22, 35, 0.8)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px'
+              borderRadius: '16px',
+              opacity: cards.length >= 10 ? 0.5 : 1
             }}>
-              <input className="cyber-input" style={{ width: '100%' }} placeholder="Slot raqami (1, 2, 3)" value={newCardSlot} onChange={e => setNewCardSlot(e.target.value)} required type="number" />
-              <input className="cyber-input" style={{ width: '100%' }} placeholder="Karta raqami" value={newCardNumber} onChange={e => setNewCardNumber(e.target.value)} required />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input className="cyber-input" placeholder="Egasi (ism)" value={newCardHolder} onChange={e => setNewCardHolder(e.target.value)} />
-                <input className="cyber-input" placeholder="Bank nomi" value={newCardBank} onChange={e => setNewCardBank(e.target.value)} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
+                <input className="cyber-input" placeholder="Slot (1-10)" value={newCardSlot} onChange={e => setNewCardSlot(e.target.value)} required type="number" min="1" max="10" disabled={cards.length >= 10} />
+                <input className="cyber-input" placeholder="Karta raqami" value={newCardNumber} onChange={e => setNewCardNumber(e.target.value)} required disabled={cards.length >= 10} />
               </div>
-              <button type="submit" className="neon-btn" style={{ width: '100%', marginTop: '4px' }}>Qo'shish</button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input className="cyber-input" placeholder="Egasi (ism)" value={newCardHolder} onChange={e => setNewCardHolder(e.target.value)} disabled={cards.length >= 10} />
+                <input className="cyber-input" placeholder="Bank nomi" value={newCardBank} onChange={e => setNewCardBank(e.target.value)} disabled={cards.length >= 10} />
+              </div>
+              <button type="submit" className="neon-btn" style={{ width: '100%', marginTop: '4px' }} disabled={cards.length >= 10}>Qo'shish</button>
             </form>
           </div>
         )}

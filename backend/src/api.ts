@@ -296,11 +296,27 @@ app.get('/api/cards', requireAdmin, async (req, res) => {
 app.post('/api/admin/cards', requireAdmin, async (req, res) => {
   try {
     const { slot, cardNumber, cardHolder, bankName, maxTransfers } = req.body;
+    
+    // Max 10 cards limit
+    const cardCount = await prisma.card.count();
+    if (cardCount >= 10) {
+      return res.status(400).json({ error: 'Maksimum 10 ta karta qo\'shish mumkin' });
+    }
+    
+    // Slot must be 1-10
+    const slotNum = Number(slot);
+    if (!slotNum || slotNum < 1 || slotNum > 10) {
+      return res.status(400).json({ error: 'Slot raqami 1 dan 10 gacha bo\'lishi kerak' });
+    }
+    
     const card = await prisma.card.create({
-      data: { slot: Number(slot), cardNumber, cardHolder, bankName, maxTransfers: Number(maxTransfers) || 35 }
+      data: { slot: slotNum, cardNumber, cardHolder, bankName, maxTransfers: Number(maxTransfers) || 40 }
     });
     res.json(card);
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === 'P2002') {
+      return res.status(400).json({ error: 'Bu slot raqami allaqachon mavjud' });
+    }
     res.status(500).json({ error: 'Failed to create card' });
   }
 });

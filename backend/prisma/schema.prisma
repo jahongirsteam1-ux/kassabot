@@ -52,12 +52,12 @@ model Settings {
 
 model Card {
   id             Int      @id @default(autoincrement())
-  slot           Int      @unique // 1, 2, 3
+  slot           Int      @unique // 1..10, determines rotation order
   cardNumber     String
   cardHolder     String   @default("")
   bankName       String   @default("")
   transferCount  Int      @default(0)
-  maxTransfers   Int      @default(35)
+  maxTransfers   Int      @default(40)
   isActive       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
