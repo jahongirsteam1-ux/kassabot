@@ -282,6 +282,85 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   }
 });
 
+// --- Mandatory Subscription Channels ---
+
+// Public endpoint — used by bot to get list of mandatory channels
+app.get('/api/mandatory-channels', async (req, res) => {
+  try {
+    const channels = await prisma.mandatoryChannel.findMany({ orderBy: { order: 'asc' } });
+    res.json(channels);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch mandatory channels' });
+  }
+});
+
+// Admin CRUD
+app.get('/api/admin/mandatory-channels', requireAdmin, async (req, res) => {
+  try {
+    const channels = await prisma.mandatoryChannel.findMany({ orderBy: { order: 'asc' } });
+    res.json(channels);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch mandatory channels' });
+  }
+});
+
+app.post('/api/admin/mandatory-channels', requireAdmin, async (req, res) => {
+  try {
+    const count = await prisma.mandatoryChannel.count();
+    if (count >= 10) {
+      return res.status(400).json({ error: 'Maksimum 10 ta majburiy kanal qo\'shish mumkin' });
+    }
+    const { channelId, title, inviteLink } = req.body;
+    if (!channelId || !title) {
+      return res.status(400).json({ error: 'channelId va title majburiy' });
+    }
+    const channel = await prisma.mandatoryChannel.create({
+      data: { channelId: channelId.toString(), title, inviteLink: inviteLink || null, order: count }
+    });
+    res.json(channel);
+  } catch (err: any) {
+    if (err?.code === 'P2002') {
+      return res.status(400).json({ error: 'Bu kanal allaqachon qo\'shilgan' });
+    }
+    res.status(500).json({ error: 'Failed to add mandatory channel' });
+  }
+});
+
+app.delete('/api/admin/mandatory-channels/:id', requireAdmin, async (req, res) => {
+  try {
+    await prisma.mandatoryChannel.delete({ where: { id: Number(req.params.id) } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete mandatory channel' });
+  }
+});
+
+// Check if a user is subscribed to all mandatory channels
+app.get('/api/check-mandatory/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const mandatoryChannels = await prisma.mandatoryChannel.findMany({ orderBy: { order: 'asc' } });
+    if (mandatoryChannels.length === 0) return res.json({ ok: true, missing: [] });
+
+    const missing: any[] = [];
+    for (const ch of mandatoryChannels) {
+      try {
+        const member = await bot.telegram.getChatMember(ch.channelId, Number(userId));
+        const status = member.status;
+        if (!['member', 'administrator', 'creator'].includes(status)) {
+          missing.push({ id: ch.id, channelId: ch.channelId, title: ch.title, inviteLink: ch.inviteLink });
+        }
+      } catch {
+        // Can't check = treat as not subscribed
+        missing.push({ id: ch.id, channelId: ch.channelId, title: ch.title, inviteLink: ch.inviteLink });
+      }
+    }
+    res.json({ ok: missing.length === 0, missing });
+  } catch (err) {
+    res.status(500).json({ error: 'Check failed' });
+  }
+});
+
 // --- Card Management Routes ---
 
 app.get('/api/cards', requireAdmin, async (req, res) => {

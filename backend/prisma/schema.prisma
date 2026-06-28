@@ -50,6 +50,15 @@ model Settings {
   rubRate          Float   @default(155)
 }
 
+model MandatoryChannel {
+  id          Int      @id @default(autoincrement())
+  channelId   String   @unique  // Telegram channel/group ID (e.g. -100xxx) or @username
+  title       String            // Display name
+  inviteLink  String?           // Optional invite link shown to user
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
 model Card {
   id             Int      @id @default(autoincrement())
   slot           Int      @unique // 1..10, determines rotation order

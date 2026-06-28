@@ -20,6 +20,44 @@ function isAdmin(userId: string): boolean {
   return adminIds.includes(userId);
 }
 
+// ============ MANDATORY SUBSCRIPTION CHECK ============
+
+async function checkMandatorySubscription(userId: number): Promise<{ ok: boolean; missing: any[] }> {
+  try {
+    const mandatoryChannels = await prisma.mandatoryChannel.findMany({ orderBy: { order: 'asc' } });
+    if (mandatoryChannels.length === 0) return { ok: true, missing: [] };
+
+    const missing: any[] = [];
+    for (const ch of mandatoryChannels) {
+      try {
+        const member = await bot.telegram.getChatMember(ch.channelId, userId);
+        if (!['member', 'administrator', 'creator'].includes(member.status)) {
+          missing.push(ch);
+        }
+      } catch {
+        missing.push(ch);
+      }
+    }
+    return { ok: missing.length === 0, missing };
+  } catch {
+    return { ok: true, missing: [] }; // fail open
+  }
+}
+
+async function sendSubscriptionPrompt(ctx: any, missing: any[]) {
+  const buttons = missing.map((ch: any) => [
+    Markup.button.url(`📢 ${ch.title}`, ch.inviteLink || `https://t.me/${ch.channelId.replace('@', '')}`)
+  ]);
+  buttons.push([Markup.button.callback('✅ Tekshirish', 'check_subscription')]);
+  
+  await ctx.reply(
+    `⚠️ Botdan foydalanish uchun quyidagi kanal(lar)ga obuna bo'lishingiz shart:\n\n` +
+    missing.map((ch: any) => `• ${ch.title}`).join('\n') +
+    `\n\nObuna bo'lgach, "✅ Tekshirish" tugmasini bosing.`,
+    Markup.inlineKeyboard(buttons)
+  );
+}
+
 // ============ COMMANDS ============
 
 bot.start(async (ctx) => {
@@ -27,20 +65,18 @@ bot.start(async (ctx) => {
   if (user) {
     await prisma.user.upsert({
       where: { id: user.id.toString() },
-      update: {
-        username: user.username,
-        firstName: user.first_name,
-      },
-      create: {
-        id: user.id.toString(),
-        username: user.username,
-        firstName: user.first_name,
-      }
+      update: { username: user.username, firstName: user.first_name },
+      create: { id: user.id.toString(), username: user.username, firstName: user.first_name }
     });
   }
 
+  // Check mandatory subscriptions
+  const { ok, missing } = await checkMandatorySubscription(ctx.from.id);
+  if (!ok) {
+    return sendSubscriptionPrompt(ctx, missing);
+  }
+
   const webAppUrl = process.env.WEBAPP_URL || 'https://google.com';
-  
   await ctx.reply(
     '🌟 Salom! VIP kanallarga obuna bo\'lish va ularni boshqarish uchun pastdagi tugmani bosing.',
     Markup.inlineKeyboard([
@@ -62,6 +98,38 @@ bot.command('admin', async (ctx) => {
       Markup.button.webApp('⚙️ Boshqaruv Paneli', `${webAppUrl}?admin=true`)
     ])
   );
+});
+
+// ✅ Check subscription callback — fires when user clicks "Tekshirish"
+bot.action('check_subscription', async (ctx) => {
+  await ctx.answerCbQuery();
+  const { ok, missing } = await checkMandatorySubscription(ctx.from!.id);
+  if (!ok) {
+    await sendSubscriptionPrompt(ctx, missing);
+  } else {
+    const webAppUrl = process.env.WEBAPP_URL || 'https://google.com';
+    try { await ctx.deleteMessage(); } catch {}
+    await ctx.reply(
+      '✅ Rahmat! Siz barcha kanallarga obuna bo\'lganingiz tasdiqlandi.\n\nPastdagi tugmani bosing:',
+      Markup.inlineKeyboard([
+        Markup.button.webApp('🚀 Obunalarni boshqarish', webAppUrl)
+      ])
+    );
+  }
+});
+
+// 🔒 Middleware: every non-admin user message checks mandatory subscriptions
+bot.use(async (ctx, next) => {
+  // Only check for private chats and actual users (not channel posts)
+  if (ctx.chat?.type !== 'private' || !ctx.from) return next();
+  // Skip admins
+  if (isAdmin(ctx.from.id.toString())) return next();
+
+  const { ok, missing } = await checkMandatorySubscription(ctx.from.id);
+  if (!ok) {
+    return sendSubscriptionPrompt(ctx, missing);
+  }
+  return next();
 });
 
 // /mystatus — foydalanuvchi obunalarini ko'rsatish

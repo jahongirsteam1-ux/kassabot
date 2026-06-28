@@ -55,6 +55,12 @@ export default function AdminView() {
   const [newCardNumber, setNewCardNumber] = useState('');
   const [newCardHolder, setNewCardHolder] = useState('');
   const [newCardBank, setNewCardBank] = useState('');
+
+  // Mandatory Channels
+  const [mandatoryChannels, setMandatoryChannels] = useState<any[]>([]);
+  const [newMandatoryId, setNewMandatoryId] = useState('');
+  const [newMandatoryTitle, setNewMandatoryTitle] = useState('');
+  const [newMandatoryLink, setNewMandatoryLink] = useState('');
   
   // New channel form
   const [newChannelId, setNewChannelId] = useState('');
@@ -75,7 +81,7 @@ export default function AdminView() {
 
   const fetchData = async () => {
     try {
-      const [chRes, stRes, setRes, usrRes, payRes, revRes, promoRes, cardsRes] = await Promise.all([
+      const [chRes, stRes, setRes, usrRes, payRes, revRes, promoRes, cardsRes, mandRes] = await Promise.all([
         fetch(`${API_URL}/channels`),
         fetch(`${API_URL}/admin/stats`, { headers }),
         fetch(`${API_URL}/admin/settings`, { headers }),
@@ -83,7 +89,8 @@ export default function AdminView() {
         fetch(`${API_URL}/admin/payments?status=${paymentFilter}`, { headers }),
         fetch(`${API_URL}/admin/revenue`, { headers }),
         fetch(`${API_URL}/admin/promos`, { headers }),
-        fetch(`${API_URL}/cards`, { headers })
+        fetch(`${API_URL}/cards`, { headers }),
+        fetch(`${API_URL}/admin/mandatory-channels`, { headers })
       ]);
       if (chRes.ok) setChannels(await chRes.json());
       if (stRes.ok) setStats(await stRes.json());
@@ -93,6 +100,7 @@ export default function AdminView() {
       if (revRes.ok) setRevenue(await revRes.json());
       if (promoRes.ok) setPromos(await promoRes.json());
       if (cardsRes.ok) setCards(await cardsRes.json());
+      if (mandRes.ok) setMandatoryChannels(await mandRes.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -488,7 +496,9 @@ export default function AdminView() {
         {activeTab === 'settings' && (
           <div>
             <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Sozlamalar</h2>
-            <form onSubmit={handleSaveSettings} className="cyber-card" style={{ padding: '20px' }}>
+            
+            {/* SMS kanal settings */}
+            <form onSubmit={handleSaveSettings} className="cyber-card" style={{ padding: '20px', marginBottom: '24px' }}>
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontSize: '12px', opacity: 0.8, display: 'block', marginBottom: '5px' }}>SMS Kanal ID (To'lovlarni tekshirish uchun)</label>
                 <input 
@@ -504,6 +514,71 @@ export default function AdminView() {
                 {savingSettings ? <div className="spinner"></div> : <><Save size={16} style={{ display: 'inline', marginRight: '5px' }} /> Saqlash</>}
               </button>
             </form>
+
+            {/* Mandatory subscription channels */}
+            <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#e0b3ff' }}>🔒 Majburiy Obuna Kanallari</h3>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{mandatoryChannels.length}/10</span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Bu kanallarga obuna bo'lmagan foydalanuvchilar botni ishlatа olmaydi.
+            </p>
+
+            {/* Existing mandatory channels list */}
+            {mandatoryChannels.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                {mandatoryChannels.map((ch: any) => (
+                  <div key={ch.id} className="credit-card-item" style={{ padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '2px' }}>{ch.title}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{ch.channelId}</div>
+                      {ch.inviteLink && <div style={{ fontSize: '11px', color: 'var(--accent-cyan)', marginTop: '2px' }}>{ch.inviteLink}</div>}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${ch.title}" ni o'chirasizmi?`)) return;
+                        const res = await fetch(`${API_URL}/admin/mandatory-channels/${ch.id}`, { method: 'DELETE', headers });
+                        if (res.ok) fetchData();
+                      }}
+                      className="action-btn delete"
+                    ><Trash2 size={15}/></button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add new mandatory channel form */}
+            {mandatoryChannels.length >= 10 ? (
+              <div style={{ padding: '12px', borderRadius: '10px', background: 'rgba(255,0,85,0.1)', border: '1px solid rgba(255,0,85,0.3)', fontSize: '13px', color: '#ff6b9d' }}>
+                ⚠️ Maksimal 10 ta kanal qo'shilgan.
+              </div>
+            ) : (
+              <div style={{ padding: '18px', background: 'rgba(20, 22, 35, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <h4 style={{ fontSize: '14px', color: '#e0b3ff', margin: 0 }}>Yangi kanal qo'shish</h4>
+                <input className="cyber-input" style={{ width: '100%' }} placeholder="Kanal ID (-100... yoki @username)" value={newMandatoryId} onChange={e => setNewMandatoryId(e.target.value)} />
+                <input className="cyber-input" style={{ width: '100%' }} placeholder="Kanal nomi (ko'rsatiladigan nom)" value={newMandatoryTitle} onChange={e => setNewMandatoryTitle(e.target.value)} />
+                <input className="cyber-input" style={{ width: '100%' }} placeholder="Invite link (ixtiyoriy: https://t.me/...)" value={newMandatoryLink} onChange={e => setNewMandatoryLink(e.target.value)} />
+                <button
+                  className="neon-btn"
+                  style={{ width: '100%' }}
+                  onClick={async () => {
+                    if (!newMandatoryId || !newMandatoryTitle) return alert('Kanal ID va nom majburiy');
+                    const res = await fetch(`${API_URL}/admin/mandatory-channels`, {
+                      method: 'POST',
+                      headers,
+                      body: JSON.stringify({ channelId: newMandatoryId, title: newMandatoryTitle, inviteLink: newMandatoryLink || null })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      setNewMandatoryId(''); setNewMandatoryTitle(''); setNewMandatoryLink('');
+                      fetchData();
+                    } else {
+                      alert(data.error || 'Xatolik');
+                    }
+                  }}
+                >+ Qo'shish</button>
+              </div>
+            )}
           </div>
         )}
 
