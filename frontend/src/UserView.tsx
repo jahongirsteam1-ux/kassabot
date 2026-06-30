@@ -29,6 +29,7 @@ function UserView() {
   const [paying, setPaying] = useState(false);
   const [activePayment, setActivePayment] = useState<any>(null);
   const [cardNumber, setCardNumber] = useState<string>('');
+  const [cardHolder, setCardHolder] = useState<string>('');
   const [complaintSent, setComplaintSent] = useState(false);
   const [complaintLoading, setComplaintLoading] = useState(false);
 
@@ -66,6 +67,7 @@ function UserView() {
       .then(res => res.json())
       .then(data => {
         if (data.cardNumber) setCardNumber(data.cardNumber);
+        if (data.cardHolder) setCardHolder(data.cardHolder);
       })
       .catch(err => console.error(err));
   }, []);
@@ -160,7 +162,7 @@ function UserView() {
             <h2 className="gradient-title" style={{ fontSize: '22px', marginBottom: '15px' }}>To'lov qilish</h2>
             <div style={{ background: 'rgba(255, 0, 85, 0.1)', border: '1px solid var(--accent-red)', padding: '12px', borderRadius: '12px', marginBottom: '15px' }}>
               <p style={{ fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>
-                Diqqat! Bank ilovangizda (Sberbank, Tinkoff) o'tkazma valyutasini RUBL emas, SO'M (UZS) deb tanlang va aniq quyidagi summani yozing. 1 so'm kam yoki ko'p bo'lsa ham tizim to'lovni avtomat qabul qilmaydi!
+                ⚠️ Diqqat! Iltimos, faqat ekraningizda ko'rsatilgan summani o'tkazing. 1 so'm kam yoki ko'p bo'lsa ham tizim to'lovni avtomat qabul qilmaydi!
               </p>
             </div>
             
@@ -169,6 +171,11 @@ function UserView() {
               <div style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '2px', userSelect: 'all', color: '#fff', marginTop: '4px' }}>
                 {cardNumber || "Admin karta kiritmagan!"}
               </div>
+              {cardHolder && (
+                <div style={{ fontSize: '13px', color: 'var(--accent-cyan)', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  👤 {cardHolder}
+                </div>
+              )}
             </div>
 
             <div style={{ background: 'rgba(176, 38, 255, 0.1)', border: '1px solid var(--accent)', padding: '15px', borderRadius: '12px', marginBottom: '20px' }}>

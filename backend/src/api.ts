@@ -723,6 +723,7 @@ app.get('/api/settings', async (req, res) => {
     
     res.json({ 
       cardNumber: activeCard ? activeCard.cardNumber : '',
+      cardHolder: activeCard ? activeCard.cardHolder : '',
       rubRate: settings.rubRate || 155
     });
   } catch (err) {
